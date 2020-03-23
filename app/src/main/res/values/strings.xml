@@ -5,4 +5,6 @@
     <string name="drawer_item_home">Home</string>
     <string name="drawer_item_settings">Setting</string>
     <string name="covid19">Covid 19</string>
+    <string name="drawer_item_logout">Logout</string>
+    <string name="drawer_item_updates">Updates</string>
 </resources>
