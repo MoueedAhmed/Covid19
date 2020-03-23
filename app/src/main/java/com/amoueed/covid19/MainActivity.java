@@ -3,6 +3,10 @@ package com.amoueed.covid19;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -16,12 +20,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.amoueed.covid19.adapter.MessageAdapter;
+import com.amoueed.covid19.fragment.HelpFragment;
 import com.amoueed.covid19.model.FriendlyMessage;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -62,7 +69,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mPhotoPickerButton;
     private EditText mMessageEditText;
     private Button mSendButton;
-    Toolbar toolbar;
+    private Toolbar toolbar;
+    private RelativeLayout parentView;
+    private FrameLayout fragment_frame;
 
     private String mUsername;
 
@@ -80,25 +89,46 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);
+        parentView = findViewById(R.id.parentView);
+        fragment_frame = findViewById(R.id.fragment_frame);
         //if you want to update the items at a later time it is recommended to keep it in a variable
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_updates);
-        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_logout);
+        final PrimaryDrawerItem updates_item = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_updates);
+        final PrimaryDrawerItem help_item = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_help);
+        final SecondaryDrawerItem logout_item = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item_logout);
 
         //create the drawer and remember the `Drawer` result object
         Drawer result = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
                 .addDrawerItems(
-                        item1,
-                        item2
+                        updates_item,
+                        help_item,
+                        new DividerDrawerItem(),
+                        logout_item
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
 
-                        if( position==0 ){
-                            Toast.makeText(MainActivity.this, "Updates", Toast.LENGTH_SHORT).show();
-                        }else if (position == 1){
+                        if( drawerItem == updates_item ){
+                            fragment_frame.setVisibility(View.GONE);
+                            parentView.setVisibility(View.VISIBLE);
+
+                        } else if (drawerItem == help_item ){
+
+                            parentView.setVisibility(View.GONE);
+                            fragment_frame.setVisibility(View.VISIBLE);
+                            Fragment fragment = null;
+
+                            fragment = HelpFragment.newInstance(null,null);
+
+                            if (fragment != null) {
+                                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                                ft.add(R.id.fragment_frame, fragment);
+                                ft.commit();
+                            }
+
+                        }else if (drawerItem == logout_item ){
                             Toast.makeText(MainActivity.this, "Logout", Toast.LENGTH_SHORT).show();
                             AuthUI.getInstance().signOut(MainActivity.this);
                             finish();
@@ -206,6 +236,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (parentView.getVisibility() == View.GONE) {
+            fragment_frame.setVisibility(View.GONE);
+            parentView.setVisibility(View.VISIBLE);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
