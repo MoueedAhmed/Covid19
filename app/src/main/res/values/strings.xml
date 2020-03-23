@@ -2,4 +2,7 @@
     <string name="app_name">Covid 19</string>
     <string name="sign_out">Sign Out</string>
     <string name="send_button_label">Send</string>
+    <string name="drawer_item_home">Home</string>
+    <string name="drawer_item_settings">Setting</string>
+    <string name="covid19">Covid 19</string>
 </resources>
