@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.amoueed.covid19.adapter.MessageAdapter;
 import com.amoueed.covid19.fragment.HelpFragment;
+import com.amoueed.covid19.fragment.ScoreFragment;
 import com.amoueed.covid19.model.FriendlyMessage;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -94,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
         //if you want to update the items at a later time it is recommended to keep it in a variable
         final PrimaryDrawerItem updates_item = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_updates);
         final PrimaryDrawerItem help_item = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_help);
-        final SecondaryDrawerItem logout_item = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item_logout);
+        final PrimaryDrawerItem score_item = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item_score);
+        final SecondaryDrawerItem logout_item = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.drawer_item_logout);
 
         //create the drawer and remember the `Drawer` result object
         Drawer result = new DrawerBuilder()
@@ -103,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 .addDrawerItems(
                         updates_item,
                         help_item,
+                        score_item,
                         new DividerDrawerItem(),
                         logout_item
                 )
@@ -124,7 +127,29 @@ public class MainActivity extends AppCompatActivity {
 
                             if (fragment != null) {
                                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                                ft.add(R.id.fragment_frame, fragment);
+                                if(fragment_frame.getVisibility()==View.VISIBLE){
+                                    ft.replace(R.id.fragment_frame, fragment);
+                                }else{
+                                    ft.add(R.id.fragment_frame, fragment);
+                                }
+                                ft.commit();
+                            }
+
+                        }else if (drawerItem == score_item ){
+
+                            parentView.setVisibility(View.GONE);
+                            fragment_frame.setVisibility(View.VISIBLE);
+                            Fragment fragment = null;
+
+                            fragment = ScoreFragment.newInstance(null,null);
+
+                            if (fragment != null) {
+                                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                                if(fragment_frame.getVisibility()==View.VISIBLE){
+                                    ft.replace(R.id.fragment_frame, fragment);
+                                }else{
+                                    ft.add(R.id.fragment_frame, fragment);
+                                }
                                 ft.commit();
                             }
 

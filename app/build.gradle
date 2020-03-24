@@ -11,6 +11,7 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,5 +47,6 @@ dependencies {
     implementation "androidx.cardview:cardview:1.0.0"
 
     implementation "com.mikepenz:materialdrawer:6.1.2"
+    implementation 'com.android.support:multidex:1.0.3'
 
 }
