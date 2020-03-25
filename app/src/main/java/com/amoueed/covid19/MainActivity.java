@@ -8,12 +8,16 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,6 +36,7 @@ import com.amoueed.covid19.fragment.HelpFragment;
 import com.amoueed.covid19.fragment.ScoreFragment;
 import com.amoueed.covid19.model.FriendlyMessage;
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,6 +46,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -117,7 +123,8 @@ public class MainActivity extends AppCompatActivity {
                             fragment_frame.setVisibility(View.GONE);
                             parentView.setVisibility(View.VISIBLE);
 
-                        } else if (drawerItem == help_item ){
+                        }
+                        else if (drawerItem == help_item ){
 
                             parentView.setVisibility(View.GONE);
                             fragment_frame.setVisibility(View.VISIBLE);
@@ -135,7 +142,8 @@ public class MainActivity extends AppCompatActivity {
                                 ft.commit();
                             }
 
-                        }else if (drawerItem == score_item ){
+                        }
+                        else if (drawerItem == score_item ){
 
                             parentView.setVisibility(View.GONE);
                             fragment_frame.setVisibility(View.VISIBLE);
@@ -153,7 +161,8 @@ public class MainActivity extends AppCompatActivity {
                                 ft.commit();
                             }
 
-                        }else if (drawerItem == logout_item ){
+                        }
+                        else if (drawerItem == logout_item ){
                             Toast.makeText(MainActivity.this, "Logout", Toast.LENGTH_SHORT).show();
                             AuthUI.getInstance().signOut(MainActivity.this);
                             finish();
@@ -162,6 +171,53 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .build();
+
+        ///////////////////////////////////////////FCM START////////////////////////////////////////////////////////////////
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create channel to show notifications.
+            String channelId  = getString(R.string.default_notification_channel_id);
+            String channelName = getString(R.string.default_notification_channel_name);
+            NotificationManager notificationManager =
+                    getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(new NotificationChannel(channelId,
+                    channelName, NotificationManager.IMPORTANCE_LOW));
+        }
+
+        // If a notification message is tapped, any data accompanying the notification
+        // message is available in the intent extras. In this sample the launcher
+        // intent is fired when the notification is tapped, so any accompanying data would
+        // be handled here. If you want a different intent fired, set the click_action
+        // field of the notification message to the desired intent. The launcher intent
+        // is used when no click_action is specified.
+        //
+        // Handle possible data accompanying notification message.
+        // [START handle_data_extras]
+        if (getIntent().getExtras() != null) {
+            for (String key : getIntent().getExtras().keySet()) {
+                Object value = getIntent().getExtras().get(key);
+                Log.d(TAG, "Key: " + key + " Value: " + value);
+            }
+        }
+        // [END handle_data_extras]
+
+        Log.d(TAG, "Subscribing to weather topic");
+        // [START subscribe_topics]
+        FirebaseMessaging.getInstance().subscribeToTopic("covid")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        String msg = getString(R.string.msg_subscribed);
+                        if (!task.isSuccessful()) {
+                            msg = getString(R.string.msg_subscribe_failed);
+                        }
+                        Log.d(TAG, msg);
+                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                });
+        // [END subscribe_topics]
+
+        //////////////////////////////////////////FCM END/////////////////////////////////////////////////////////////////
 
 
         // Initialize Firebase components
